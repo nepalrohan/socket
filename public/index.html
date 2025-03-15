@@ -10,7 +10,7 @@
 <div id="user-list">
 
 <h3>Online Users</h3>
-<ul id="'users"></ul>
+<ul id="users"></ul>
 
 </div>
 
@@ -26,6 +26,65 @@
 
     <button id="" type="submit">Send</button>
 </form>
+<script src="/socket.io/socket.io.js"></script>
+<script>
 
+
+const socket = io();
+const chat = document.getElementById('chat');
+const userList = document.getElementById('users');
+const messageForm = document.getElementById('message-form');
+const messageInput = document.getElementById('message-input');
+
+
+const userName = prompt('Enter your username');
+socket.emit('join', userName);
+socket.on('userJoined', (user)=>{
+addMessage(`${user} has joined a chat`)
+});
+
+socket.on('userLeft', (user)=>{
+    addMessage(`${user} has left the chat`)
+})
+
+socket.on('userList', (users)=>{
+    userList.innerHTML = users.map(user=>`<li>
+    ${user}
+        </li>`).join(' ')
+});
+
+
+socket.on('chatMessage', (message)=>{
+    addMessage(`${message.userName}:${message.text}`)
+})
+
+messageForm.addEventListener('submit', (event)=>{
+    event.preventDefault();
+    const extractMessagetext = messageInput.value.trim();
+    if(extractMessagetext){
+        socket.emit('chatMessage', {
+            userName, text:extractMessagetext
+        })
+        messageInput.value = '';
+    }
+})
+
+function addMessage(input){
+
+
+    const messageElement = document.createElement('div');
+    messageElement.textContent = input;
+    chat.appendChild(messageElement);
+
+    //scroll to bottom of chat container
+
+    chat.scrollTop = chat.scrollHeight;
+
+}
+
+
+
+
+</script>
 </body>
 </html>
